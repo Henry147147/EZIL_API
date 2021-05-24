@@ -1,6 +1,6 @@
 from ast import literal_eval
 
-PATH = "A:\\Python Project\\ezil_api\\Data\\"
+PATH = os.getcwd() + "\\Data\\"
 WORKER_SPLIT = 0.50  # used if start balance is not 0
 
 
