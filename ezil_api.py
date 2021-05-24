@@ -21,6 +21,8 @@ class API:
         self.url_balance = f"https://billing.ezil.me/balances/{eth_address}.{zil_address}"
         self.url_hashrate = f"https://stats.ezil.me/current_stats/{eth_address}.{zil_address}/reported"
         self.url_workers = f"https://stats.ezil.me/current_stats/{eth_address}.{zil_address}/workers"
+        if not os.path.isdir(PATH):
+            os.mkdir(PATH)
 
     def get_data(self):
         time_dict = {"1": int(time.time())}
