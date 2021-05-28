@@ -1,13 +1,7 @@
 from ast import literal_eval
 
-PATH = os.getcwd() + "\\Data\\"
+PATH = "A:\\Python Project\\ezil_api\\Data\\"
 WORKER_SPLIT = 0.50  # used if start balance is not 0
-
-
-def make_file(name, config_dict, type_conf, path=PATH):
-    with open(path + name + "." + type_conf, "a+") as file:
-        for keys, values in zip(config_dict.keys(), config_dict.values()):
-            file.write(f"{keys}={values}\n")
 
 
 def read_data(path, file_name):
@@ -44,22 +38,22 @@ def eval_data():
     balance_eth_delta = []
     total_integral = []
     temp_integral = 0
-
+    first_flag = True
     files_workers = read_data(path=PATH, file_name="Worker_Data.Data")
 
     for worker_data in files_workers:
-        index = files_workers.index(worker_data)
-        for keys in worker_data.keys():
-            if "average_hashrate_" in keys:
-                worker = keys[17:]
-                if worker not in workers:
-                    workers.append(worker)
-                    hashrate_workers[worker] = []
-                    balance_workers_eth[worker] = 0
-                    balance_workers_zil[worker] = 0
-                    integral_worker[worker] = []
-                    worker_percentage[worker] = []
-                    b[worker] = []
+        worker_list_temp = [worker_temp[17:] for worker_temp in worker_data.keys() if
+                            "average_hashrate_" in worker_temp]
+
+        for worker in worker_list_temp:
+            if worker not in workers:
+                workers.append(worker)
+                hashrate_workers[worker] = []
+                balance_workers_eth[worker] = 0
+                balance_workers_zil[worker] = 0
+                integral_worker[worker] = []
+                worker_percentage[worker] = []
+                b[worker] = []
 
         current_balance_eth = float(worker_data["eth"])
         current_balance_zil = float(worker_data["zil"])
@@ -78,7 +72,7 @@ def eval_data():
 
         hashrate_pool.append(float(worker_data["pool_current_hashrate"]))
 
-        if index > 0:
+        if not first_flag:
             if current_balance_eth > balance_eth[-1]:
                 delta_eth = current_balance_eth - balance_eth[-1]
                 balance_delta_eth.append(delta_eth)
@@ -98,14 +92,13 @@ def eval_data():
             start_balance_zil = current_balance_zil
             balance_delta_eth.append(0)
             balance_delta_zil.append(0)
+            first_flag = False
 
         balance_eth.append(current_balance_eth)
         balance_zil.append(current_balance_zil)
         time.append(current_time)
 
-    del current_time, current_balance_zil, current_worker_in_keys, worker_hashrate, index, worker
-
-    for d_eth, index_temp in zip(balance_delta_eth, range(len(balance_delta_eth))):
+    for index_temp, d_eth in enumerate(balance_delta_eth):
         if d_eth != 0:
             delta_eth_range.append(index_temp)
 
@@ -162,15 +155,11 @@ def eval_data():
                     riemann_integral = y[0] * x[0]
                     integral_worker[worker].append(riemann_integral)
 
-    del temp_hashrate_list, temp_time_delta_list, temp_hashrate_len, x, y, riemann_integral
-
     for index in range(len(integral_worker[workers[0]])):
         for worker in integral_worker.keys():
             temp_integral += integral_worker[worker][index]
         total_integral.append(temp_integral)
         temp_integral = 0
-
-    del temp_integral
 
     for worker in workers:
         for integral_t, worker_integral in zip(total_integral, integral_worker[worker]):
